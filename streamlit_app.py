@@ -21,8 +21,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 2. DATA LOADING (Cached for Speed) ---
+@st.cache_resource
+def ensure_database_exists():
+    """Checks if DB exists, if not, rebuilds it from raw data."""
+    from src.config import DB_PATH
+    from src.database import load_raw_data, create_master_table
+    
+    if not DB_PATH.exists():
+        with st.spinner("⚠️ Database not found. Building from raw data... (This may take a minute)"):
+            try:
+                load_raw_data()
+                create_master_table()
+                st.success("Database built successfully!")
+            except Exception as e:
+                st.error(f"Failed to build database: {e}")
+                st.stop()
+
 @st.cache_data
 def load_dashboard_data():
+    ensure_database_exists()
     try:
         # Load data from our SQLite DB
         df = load_data("SELECT * FROM master_analytics_table")

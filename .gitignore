@@ -135,6 +135,6 @@ dmypy.json
 cython_debug/
 
 # Project specific
-data/
-models/
+data/processed/
 .env
+
