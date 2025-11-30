@@ -129,4 +129,4 @@ docker run -p 8501:8501 olist-dashboard
 
 ---
 
-_Built with ❤️ by the Olist Data Science Team_
+_Built with ❤️ by the Momin Mohammad Muneeb_
