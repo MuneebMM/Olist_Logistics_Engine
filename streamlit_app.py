@@ -23,12 +23,29 @@ st.markdown("""
 # --- 2. DATA LOADING (Cached for Speed) ---
 @st.cache_resource
 def ensure_database_exists():
-    """Checks if DB exists, if not, rebuilds it from raw data."""
+    """Checks if DB exists and has the master table. If not, rebuilds it."""
     from src.config import DB_PATH
-    from src.database import load_raw_data, create_master_table
+    from src.database import load_raw_data, create_master_table, get_db_connection
+    import sqlite3
+
+    rebuild = False
     
     if not DB_PATH.exists():
-        with st.spinner("⚠️ Database not found. Building from raw data... (This may take a minute)"):
+        rebuild = True
+    else:
+        # Check if table exists
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='master_analytics_table';")
+            if cursor.fetchone() is None:
+                rebuild = True
+            conn.close()
+        except Exception:
+            rebuild = True
+
+    if rebuild:
+        with st.spinner("⚠️ Database/Table not found. Building from raw data... (This may take a minute)"):
             try:
                 load_raw_data()
                 create_master_table()
